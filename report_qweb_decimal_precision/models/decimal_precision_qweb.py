@@ -47,12 +47,12 @@ class DecimalPrecisioQweb(models.Model):
             else:
                 return -1
         if self.uom_id:
-            if record[self.uom_field_id.name] == self.uom_id:
+            if record[self.uom_field_id.sudo().name] == self.uom_id:
                 score += 1
             else:
                 return -1
         if self.currency_id:
-            if record[self.currency_field_id.name] == self.currency_id:
+            if record[self.currency_field_id.sudo().name] == self.currency_id:
                 score += 1
             else:
                 return -1
