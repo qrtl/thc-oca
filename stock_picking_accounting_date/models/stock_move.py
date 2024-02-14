@@ -18,16 +18,13 @@ class StockMove(models.Model):
         # inventory adjustment
         force_period_date = self._context.get("force_period_date")
         if force_period_date:
-            for line in self:
-                line.accounting_date = force_period_date
+            self.write({"accounting_date": force_period_date})
         else:
-            for line in self:
-                if line.picking_id.accounting_date:
-                    line.accounting_date = line.picking_id.accounting_date
+            for rec in self:
+                if rec.picking_id.accounting_date:
+                    rec.accounting_date = rec.picking_id.accounting_date
                     continue
-                line.accounting_date = fields.Datetime.context_timestamp(
-                    self, line.date
-                )
+                rec.accounting_date = fields.Datetime.context_timestamp(self, rec.date)
 
     def _prepare_account_move_vals(
         self,
