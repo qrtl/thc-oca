@@ -18,7 +18,8 @@ class StockMove(models.Model):
         # inventory adjustment
         force_period_date = self._context.get("force_period_date")
         if force_period_date:
-            self.write({"accounting_date": force_period_date})
+            for rec in self:
+                rec.accounting_date = force_period_date
         else:
             for rec in self:
                 if rec.picking_id.accounting_date:
