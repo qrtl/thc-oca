@@ -7,10 +7,13 @@
             <tree editable="top">
                 <field name="name" />
                 <field name="report_id" />
-                <field name="template_id" />
+                <field
+                    name="template_id"
+                    attrs="{'readonly':[('report_id','!=',False)]}"
+                />
                 <field
                     name="lang"
-                    attrs="{'invisible': [('active_lang_count', '&lt;=', 1)]}"
+                    attrs="{'invisible':[('active_lang_count', '&lt;=', 1)]}"
                 />
                 <field name="content_from" />
                 <field name="content_to" />

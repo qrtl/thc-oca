@@ -23,7 +23,7 @@ class IrUiView(models.Model):
             # For reports
             lang_match = re.search(r'data-oe-lang="([^"]+)"', result_str)
             if lang_match:
-                lang_code = lang_match.group(1) if lang_match else "en_US"
+                lang_code = lang_match.group(1)
         view = self._get(template).sudo()
         content_mappings = (
             self.env["template.content.mapping"]

@@ -8,35 +8,36 @@ class TestTemplateStringSwapper(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        jp = (
+        cls.view_obj = cls.env["ir.ui.view"]
+        ja = (
             cls.env["res.lang"]
             .with_context(active_test=False)
             .search([("code", "=", "ja_JP")])
         )
-        cls.env["base.language.install"].create({"lang_ids": jp.ids}).lang_install()
+        cls.env["base.language.install"].create({"lang_ids": ja.ids}).lang_install()
 
     def test_template_string_swapper(self):
-        template = "web.external_layout_standard"
-        view = self.env["ir.ui.view"]._get(template).sudo()
+        template = "web.external_layout"
+        view = self.view_obj._get(template).sudo()
         values = {"company": self.env.company, "report_type": "pdf", "o": view}
+        result = self.view_obj._render_template(template, values)
+        self.assertTrue("Page:" in str(result))
         self.env["template.content.mapping"].create(
             {
                 "template_id": view.id,
                 "content_from": "Page:",
-                "content_to": "Page-No:",
+                "content_to": "Page No.:",
                 "lang": "en_US",
             }
         )
-        result = self.env["ir.ui.view"]._render_template(template, values)
+        result = self.view_obj._render_template(template, values)
         self.assertFalse("Page:" in str(result))
-        self.assertTrue("Page-No:" in str(result))
-        view = self.env["ir.ui.view"].with_context(lang="ja_JP").browse(view.id)
+        self.assertTrue("Page No.:" in str(result))
+        # Switch tha language to Japanese
+        view_obj = self.view_obj.with_context(lang="ja_JP")
+        view = view_obj.browse(view.id)
         values = {"company": self.env.company, "report_type": "pdf", "o": view}
-        result = (
-            self.env["ir.ui.view"]
-            .with_context(lang="ja_JP")
-            ._render_template(template, values)
-        )
+        result = view_obj._render_template(template, values)
         self.assertTrue("ページ:" in str(result))
         self.env["template.content.mapping"].create(
             {
@@ -46,10 +47,6 @@ class TestTemplateStringSwapper(TransactionCase):
                 "lang": "ja_JP",
             }
         )
-        result = (
-            self.env["ir.ui.view"]
-            .with_context(lang="ja_JP")
-            ._render_template(template, values)
-        )
+        result = view_obj._render_template(template, values)
         self.assertFalse("ページ:" in str(result))
         self.assertTrue("ページ番号:" in str(result))
