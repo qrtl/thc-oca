@@ -83,6 +83,7 @@ class StockMove(models.Model):
                     "company_id": move.company_id.id,
                 }
             )
+            move.move_line_ids.analytic_distribution = move.analytic_distribution
         return super()._action_done(cancel_backorder=cancel_backorder)
 
 
@@ -100,3 +101,8 @@ class StockMoveLine(models.Model):
         if self.analytic_distribution:
             res.update({"analytic_distribution": self.analytic_distribution})
         return res
+
+    def write(self, vals):
+        if "analytic_distribution" in vals:
+            self.move_id.analytic_distribution = vals["analytic_distribution"]
+        return super().write(vals)
