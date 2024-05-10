@@ -73,6 +73,7 @@ class StockMove(models.Model):
 
     def _action_done(self, cancel_backorder=False):
         for move in self:
+            move.move_line_ids.analytic_distribution = move.analytic_distribution
             if not move._need_validate_distribution():
                 continue
             move._validate_distribution(
@@ -83,7 +84,6 @@ class StockMove(models.Model):
                     "company_id": move.company_id.id,
                 }
             )
-            move.move_line_ids.analytic_distribution = move.analytic_distribution
         return super()._action_done(cancel_backorder=cancel_backorder)
 
 
