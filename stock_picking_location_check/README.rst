@@ -31,9 +31,9 @@ Stock Picking Location Check
 This module intends to ensure the consistency between the picking and
 its stock move lines at the time of validation.
 
-Here 'consistency' means being in the state where all the internal
-locations in stock move lines are the same as or under that of the
-corresponding location in the picking.
+Here 'consistency' means being in the state where all the locations in
+stock move lines are the same as or under that of the corresponding
+location in the picking.
 
 **Table of contents**
 
@@ -52,7 +52,7 @@ Usage
 =====
 
 An error should be displayed when validating a picking in case any of
-the internal locations involved in the move lines is not part of the
+the locations involved in the move lines is not part of the
 corresponding location in the picking.
 
 Selecting 'Allow Location Inconsistency' lets users bypass this error.

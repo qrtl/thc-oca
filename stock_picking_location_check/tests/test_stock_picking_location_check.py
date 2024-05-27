@@ -2,110 +2,73 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl)
 
 from odoo.exceptions import UserError
-from odoo.tests import TransactionCase
+from odoo.tests.common import TransactionCase
 
 
 class TestStockPickingLocationCheck(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.product = cls.env["product.product"].create({"name": "Test Product"})
-        cls.supplier_location = cls.env.ref("stock.stock_location_suppliers")
-        cls.customer_location = cls.env.ref("stock.stock_location_customers")
-        cls.shelf1 = cls.env.ref("stock.stock_location_components")
-        cls.other_location = cls.env["stock.location"].create(
-            {"name": "Other Location"}
-        )
-        # Create incoming and outgoing pickings
-        cls.picking_in = cls.env["stock.picking"].create(
+        cls.product = cls.env["product.product"].create({"name": "test product"})
+        cls.location1 = cls._create_location(cls, "location 1")
+        cls.location2 = cls._create_location(cls, "location 2")
+        cls.location2_1 = cls._create_location(cls, "location 2-1", cls.location2)
+        cls.location2_1_1 = cls._create_location(cls, "location 2-1-1", cls.location2_1)
+        cls.location3 = cls._create_location(cls, "location 3")
+        cls.picking = cls.env["stock.picking"].create(
             {
-                "location_id": cls.supplier_location.id,
-                "location_dest_id": cls.shelf1.id,
-                "picking_type_id": cls.env.ref("stock.picking_type_in").id,
-                "allow_location_inconsistency": False,
+                "picking_type_id": cls.env.ref("stock.picking_type_internal").id,
+                "location_id": cls.location1.id,
+                "location_dest_id": cls.location2.id,
             }
         )
-        cls.picking_out = cls.env["stock.picking"].create(
+        cls.move = cls.env["stock.move"].create(
             {
-                "location_id": cls.shelf1.id,
-                "location_dest_id": cls.customer_location.id,
-                "picking_type_id": cls.env.ref("stock.picking_type_out").id,
-                "allow_location_inconsistency": False,
+                "name": cls.product.name,
+                "product_id": cls.product.id,
+                "product_uom": cls.product.uom_id.id,
+                "location_id": cls.location1.id,
+                "location_dest_id": cls.location2.id,
+                "picking_id": cls.picking.id,
+                "product_uom_qty": 10,
+                "state": "assigned",
             }
         )
-
-    def create_move_and_move_line(
-        self, picking, product, location_id, location_dest_id, qty
-    ):
-        move = self.env["stock.move"].create(
+        cls.move_line = cls.env["stock.move.line"].create(
             {
-                "name": product.name,
-                "product_id": product.id,
-                "product_uom": product.uom_id.id,
-                "location_id": location_id,
-                "location_dest_id": location_dest_id,
-                "picking_id": picking.id,
-                "quantity_done": qty,
-            }
-        )
-        self.env["stock.move.line"].create(
-            {
-                "move_id": move.id,
-                "product_id": product.id,
-                "product_uom_id": product.uom_id.id,
-                "location_id": location_id,
-                "location_dest_id": location_dest_id,
-                "picking_id": picking.id,
-                "qty_done": qty,
+                "move_id": cls.move.id,
+                "product_id": cls.product.id,
+                "product_uom_id": cls.product.uom_id.id,
+                "location_id": cls.location1.id,
+                "location_dest_id": cls.location2.id,
+                "picking_id": cls.picking.id,
+                "qty_done": 10,
             }
         )
 
-    def test_incoming_location_discrepancy_allowed(self):
-        self.create_move_and_move_line(
-            self.picking_in, self.product, self.supplier_location.id, self.shelf1.id, 10
-        )
-        self.picking_in.allow_location_inconsistency = True
-        self.picking_in.action_confirm()
-        self.picking_in.action_assign()
-        self.picking_in.button_validate()
+    def _create_location(self, name, parent_location=None):
+        vals = {"name": name, "usage": "internal"}
+        if parent_location:
+            vals["location_id"] = parent_location.id
+        return self.env["stock.location"].create(vals)
 
-    def test_incoming_location_discrepancy_not_allowed(self):
-        self.create_move_and_move_line(
-            self.picking_in,
-            self.product,
-            self.supplier_location.id,
-            self.other_location.id,
-            10,
-        )
-        self.picking_in.allow_location_inconsistency = False
-        self.picking_in.action_confirm()
-        self.picking_in.action_assign()
+    def test_locations_no_inconsistency(self):
+        self.picking.button_validate()
+
+    def test_locations_no_inconsistency_recursive(self):
+        # Destination location of the move line is a grand child of that of the picking
+        self.move_line.location_dest_id = self.location2_1_1.id
+        self.picking.button_validate()
+
+    def test_locations_with_inconsistency(self):
+        # Make source locations inconsistent between picking and move line
+        self.picking.location_dest_id = self.location3
         with self.assertRaises(UserError):
-            self.picking_in.button_validate()
-
-    def test_outgoing_location_discrepancy_allowed(self):
-        self.create_move_and_move_line(
-            self.picking_out,
-            self.product,
-            self.shelf1.id,
-            self.customer_location.id,
-            10,
-        )
-        self.picking_out.allow_location_inconsistency = True
-        self.picking_out.action_confirm()
-        self.picking_out.action_assign()
-        self.picking_out.button_validate()
-
-    def test_outgoing_location_discrepancy_not_allowed(self):
-        self.create_move_and_move_line(
-            self.picking_out,
-            self.product,
-            self.other_location.id,
-            self.customer_location.id,
-            10,
-        )
-        self.picking_out.allow_location_inconsistency = False
-        self.picking_out.action_confirm()
-        self.picking_out.action_assign()
+            self.picking.button_validate()
+        self.picking.location_dest_id = self.location2
+        # Make destination locations inconsistent between picking and move line
+        self.picking.location_id = self.location3
         with self.assertRaises(UserError):
-            self.picking_out.button_validate()
+            self.picking.button_validate()
+        self.picking.allow_location_inconsistency = True
+        self.picking.button_validate()
