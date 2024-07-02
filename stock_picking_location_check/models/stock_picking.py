@@ -41,7 +41,11 @@ class StockPicking(models.Model):
                 if not getattr(line.move_id, "is_subcontract", False)
             ]
             pick._check_location_consistency(pick.location_id, line_source_locations)
-            pick._check_location_consistency(
-                pick.location_dest_id, pick.move_line_ids.location_dest_id
-            )
+            if pick._check_immediate():
+                line_dest_locations = pick.move_line_ids.location_dest_id
+            else:
+                line_dest_locations = pick.move_line_ids.filtered(
+                    lambda line: line.qty_done > 0
+                ).mapped("location_dest_id")
+            pick._check_location_consistency(pick.location_dest_id, line_dest_locations)
         return super()._action_done()
