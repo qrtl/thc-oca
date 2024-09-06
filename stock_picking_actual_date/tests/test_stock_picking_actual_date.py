@@ -10,16 +10,16 @@ class TestStockValuation(TestStockValuation):
     def setUp(self):
         super(TestStockValuation, self).setUp()
 
-    def test_stock_picking_accounting_date(self):
+    def test_stock_picking_actual_date(self):
         self.product1.categ_id.property_cost_method = "fifo"
-        accounting_date = date.today() + timedelta(days=1)
+        actual_date = date.today() + timedelta(days=1)
         receipt = self.env["stock.picking"].create(
             {
                 "location_id": self.supplier_location.id,
                 "location_dest_id": self.stock_location.id,
                 "partner_id": self.partner.id,
                 "picking_type_id": self.env.ref("stock.picking_type_in").id,
-                "accounting_date": accounting_date,
+                "actual_date": actual_date,
             }
         )
 
@@ -50,6 +50,7 @@ class TestStockValuation(TestStockValuation):
         )
         move._action_confirm()
         move._action_done()
+        self.assertEqual(move.actual_date, actual_date)
         self.assertEqual(
-            move.stock_valuation_layer_ids.account_move_id.date, accounting_date
+            move.stock_valuation_layer_ids.account_move_id.date, actual_date
         )

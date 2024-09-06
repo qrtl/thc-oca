@@ -6,12 +6,10 @@
         <field name="inherit_id" ref="stock.view_picking_form" />
         <field name="arch" type="xml">
             <xpath expr="//label[@for='scheduled_date']" position="before">
-                <field name="show_accounting_date" invisible="1" />
-                <field name="is_editable_accounting_date" invisible="1" />
+                <field name="is_editable_actual_date" invisible="1" />
                 <field
-                    name="accounting_date"
-                    attrs="{'invisible': [('show_accounting_date', '=', False)],
-                    'readonly': [('is_editable_accounting_date', '=', False)]}"
+                    name="actual_date"
+                    attrs="{'readonly': [('is_editable_actual_date', '=', False)]}"
                 />
             </xpath>
         </field>
@@ -22,7 +20,7 @@
         <field name="inherit_id" ref="stock.vpicktree" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='scheduled_date']" position="before">
-                <field name="accounting_date" optional="show" />
+                <field name="actual_date" optional="show" />
             </xpath>
         </field>
     </record>

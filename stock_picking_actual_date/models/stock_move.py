@@ -7,18 +7,18 @@ from odoo import api, fields, models
 class StockMove(models.Model):
     _inherit = "stock.move"
 
-    accounting_date = fields.Date(
-        compute="_compute_accounting_date",
+    actual_date = fields.Date(
+        compute="_compute_actual_date",
         store=True,
     )
 
-    @api.depends("date", "picking_id.accounting_date")
-    def _compute_accounting_date(self):
+    @api.depends("date", "picking_id.actual_date")
+    def _compute_actual_date(self):
         for rec in self:
-            if rec.picking_id.accounting_date:
-                rec.accounting_date = rec.picking_id.accounting_date
+            if rec.picking_id.actual_date:
+                rec.actual_date = rec.picking_id.actual_date
                 continue
-            rec.accounting_date = fields.Datetime.context_timestamp(self, rec.date)
+            rec.actual_date = fields.Datetime.context_timestamp(self, rec.date)
 
     def _prepare_account_move_vals(
         self,
@@ -39,18 +39,18 @@ class StockMove(models.Model):
             svl_id,
             cost,
         )
-        # i.e. Inventory adjustments with accounting date
+        # i.e. Inventory adjustments with actual date
         if self._context.get("force_period_date"):
-            self.write({"accounting_date": self._context["force_period_date"]})
+            self.write({"actual_date": self._context["force_period_date"]})
             return am_vals
-        if self.accounting_date:
-            am_vals.update({"date": self.accounting_date})
+        if self.actual_date:
+            am_vals.update({"date": self.actual_date})
         return am_vals
 
     def _get_price_unit(self):
-        """Passes the accounting_date to be used in currency conversion for receipts
+        """Passes the actual_date to be used in currency conversion for receipts
         in foreign currency purchases.
         """
         self.ensure_one()
-        self = self.with_context(accounting_date=self.accounting_date)
+        self = self.with_context(actual_date=self.actual_date)
         return super()._get_price_unit()
