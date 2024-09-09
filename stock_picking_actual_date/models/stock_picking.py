@@ -13,11 +13,9 @@ class StockPicking(models.Model):
     )
 
     def _compute_is_editable_actual_date(self):
-        for record in self:
-            if self.env.user.has_group("stock.group_stock_manager"):
-                record.is_editable_actual_date = True
-            else:
-                record.is_editable_actual_date = record.state not in [
-                    "done",
-                    "cancel",
-                ]
+        for rec in self:
+            rec.is_editable_actual_date = False
+            if rec.state not in ["done", "cancel"] or self.env.user.has_group(
+                "stock.group_stock_manager"
+            ):
+                rec.is_editable_actual_date = True
