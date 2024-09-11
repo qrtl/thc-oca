@@ -19,3 +19,18 @@ class StockPicking(models.Model):
                 "stock.group_stock_manager"
             ):
                 rec.is_editable_actual_date = True
+
+    def write(self, vals):
+        res = super().write(vals)
+        if "actual_date" in vals:
+            for rec in self:
+                if rec.state != "done":
+                    continue
+                account_moves = rec.move_ids.account_move_ids
+                if not account_moves:
+                    continue
+                account_moves.button_draft()
+                account_moves.name = False
+                account_moves.date = rec.actual_date
+                account_moves.action_post()
+        return res
