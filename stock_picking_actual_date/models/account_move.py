@@ -9,5 +9,5 @@ class AccountMove(models.Model):
 
     def _must_check_constrains_date_sequence(self):
         if self.env.context.get("skip_date_sequence_check"):
-            return
+            return False
         return super()._must_check_constrains_date_sequence()
