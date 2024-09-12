@@ -7,10 +7,7 @@ from odoo import fields, models
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
-    actual_date = fields.Date(
-        help="Actual date of stock picking. If set, the value is propagated "
-        "to the related journal entries as the date."
-    )
+    actual_date = fields.Date(help="Actual date of stock picking.")
     is_editable_actual_date = fields.Boolean(
         compute="_compute_is_editable_actual_date", string="Is Editable"
     )
@@ -25,7 +22,7 @@ class StockPicking(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        if "actual_date" in vals and vals["actual_date"]:
+        if "actual_date" in vals:
             for rec in self:
                 if rec.state != "done":
                     continue
@@ -33,10 +30,10 @@ class StockPicking(models.Model):
                 if not account_moves:
                     continue
                 account_moves.button_draft()
-                for move in account_moves:
-                    move = move.with_context(skip_date_sequence_check=True)
-                    move.date = rec.actual_date
-                    if not move._sequence_matches_date():
-                        move.name = False
+                for am in account_moves:
+                    am = am.with_context(skip_date_sequence_check=True)
+                    am.date = am.stock_move_id.actual_date
+                    if not am._sequence_matches_date():
+                        am.name = False
                 account_moves.action_post()
         return res

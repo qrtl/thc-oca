@@ -13,13 +13,16 @@ class StockMove(models.Model):
         store=True,
     )
 
+    def _get_timezone(self):
+        return self.env.context.get("tz") or self.env.user.tz or "UTC"
+
     @api.depends("date", "picking_id.actual_date")
     def _compute_actual_date(self):
+        tz = self._get_timezone()
         for rec in self:
             if rec.picking_id.actual_date:
                 rec.actual_date = rec.picking_id.actual_date
                 continue
-            tz = self.env.company.partner_id.tz or self.env.user.tz
             rec.actual_date = fields.Date.context_today(
                 self.with_context(tz=tz), rec.date
             )

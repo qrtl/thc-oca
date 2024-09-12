@@ -369,37 +369,33 @@ ul.auto-toc {
 !! source digest: sha256:d70c1f46222bd6a5f01ae300908138b08df6c418a5dc4eb01168cd345ba95e59
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
 <p><a class="reference external image-reference" href="https://odoo-community.org/page/development-status"><img alt="Beta" src="https://img.shields.io/badge/maturity-Beta-yellow.png" /></a> <a class="reference external image-reference" href="http://www.gnu.org/licenses/agpl-3.0-standalone.html"><img alt="License: AGPL-3" src="https://img.shields.io/badge/licence-AGPL--3-blue.png" /></a> <a class="reference external image-reference" href="https://github.com/OCA/stock-logistics-warehouse/tree/16.0/stock_picking_actual_date"><img alt="OCA/stock-logistics-warehouse" src="https://img.shields.io/badge/github-OCA%2Fstock--logistics--warehouse-lightgray.png?logo=github" /></a> <a class="reference external image-reference" href="https://translation.odoo-community.org/projects/stock-logistics-warehouse-16-0/stock-logistics-warehouse-16-0-stock_picking_actual_date"><img alt="Translate me on Weblate" src="https://img.shields.io/badge/weblate-Translate%20me-F47D42.png" /></a> <a class="reference external image-reference" href="https://runboat.odoo-community.org/builds?repo=OCA/stock-logistics-warehouse&amp;target_branch=16.0"><img alt="Try me on Runboat" src="https://img.shields.io/badge/runboat-Try%20me-875A7B.png" /></a></p>
-<p>This module adds an actual date to stock picking, stock move, and stock move line. If a picking does not specify an actual date, the stock move’s actual date will be computed based on the ‘Effective Date’.</p>
+<p>This module adds an Actual Date field to the stock picking, stock move, and stock move line models. This field allows users to record the actual date on which a stock transfer took place, in case the transaction in Odoo is processed after the fact.</p>
 <p><strong>Table of contents</strong></p>
 <div class="contents local topic" id="contents">
 <ul class="simple">
-<li><a class="reference internal" href="#configuration" id="toc-entry-1">Configuration</a></li>
-<li><a class="reference internal" href="#usage" id="toc-entry-2">Usage</a></li>
-<li><a class="reference internal" href="#known-issues-roadmap" id="toc-entry-3">Known issues / Roadmap</a></li>
-<li><a class="reference internal" href="#bug-tracker" id="toc-entry-4">Bug Tracker</a></li>
-<li><a class="reference internal" href="#credits" id="toc-entry-5">Credits</a><ul>
-<li><a class="reference internal" href="#authors" id="toc-entry-6">Authors</a></li>
-<li><a class="reference internal" href="#contributors" id="toc-entry-7">Contributors</a></li>
-<li><a class="reference internal" href="#maintainers" id="toc-entry-8">Maintainers</a></li>
+<li><a class="reference internal" href="#usage" id="toc-entry-1">Usage</a></li>
+<li><a class="reference internal" href="#known-issues-roadmap" id="toc-entry-2">Known issues / Roadmap</a></li>
+<li><a class="reference internal" href="#bug-tracker" id="toc-entry-3">Bug Tracker</a></li>
+<li><a class="reference internal" href="#credits" id="toc-entry-4">Credits</a><ul>
+<li><a class="reference internal" href="#authors" id="toc-entry-5">Authors</a></li>
+<li><a class="reference internal" href="#contributors" id="toc-entry-6">Contributors</a></li>
+<li><a class="reference internal" href="#maintainers" id="toc-entry-7">Maintainers</a></li>
 </ul>
 </li>
 </ul>
 </div>
-<div class="section" id="configuration">
-<h1><a class="toc-backref" href="#toc-entry-1">Configuration</a></h1>
-<p>The partner_tz module (<a class="reference external" href="https://github.com/OCA/partner-contact/tree/16.0/partner_tz">https://github.com/OCA/partner-contact/tree/16.0/partner_tz</a>) should be installed if the company operates internationally and has internal users in different timezones. This ensures that the actual date of stock moves is adjusted according to the company’s partner timezone by assigning the timezone to the company’s partner, allowing users to understand that this date reflects the company’s timezone.</p>
-</div>
 <div class="section" id="usage">
-<h1><a class="toc-backref" href="#toc-entry-2">Usage</a></h1>
-<p>Fill in the actual date in the picking form. The actual date from the picking is propagated to its corresponding stock moves and stock move lines, and it is also passed to the SVL’s journal entry accounting date.
-The inventory manager is only allowed to update the actual date for completed pickings.</p>
+<h1><a class="toc-backref" href="#toc-entry-1">Usage</a></h1>
+<p>Use this module’s function in the following situations:
+* If you are late in processing a transfer in Odoo and wish to record the transaction with the actual transfer date, fill in the Actual Date field in the picking form. The Actual Date of the picking is then propagated to its corresponding stock moves and stock move lines, and is also passed to the journal entry as the date.
+* You can also update the Actual Date of a completed picking if you belong to the Inventory Manager group. This operation updates the date of the related journal entries, re-proposing a new sequence to them as necessary.</p>
 </div>
 <div class="section" id="known-issues-roadmap">
-<h1><a class="toc-backref" href="#toc-entry-3">Known issues / Roadmap</a></h1>
-<p>Changing the actual date of a completed picking will propagate to the date of the related journal entry for the stock moves, and the sequence will change if the new date and the current sequence are mismatched. However, if the currency of the journal entry differs from the company currency, the debit and credit amounts will not be recalculated based on the exchange rate of the new date.</p>
+<h1><a class="toc-backref" href="#toc-entry-2">Known issues / Roadmap</a></h1>
+<p>Updating the Actual Date of a completed receipt picking for a foreign currency purchase does not trigger a recalculation of the amounts in the associated journal entries, even if the currency rate for the new date differs.</p>
 </div>
 <div class="section" id="bug-tracker">
-<h1><a class="toc-backref" href="#toc-entry-4">Bug Tracker</a></h1>
+<h1><a class="toc-backref" href="#toc-entry-3">Bug Tracker</a></h1>
 <p>Bugs are tracked on <a class="reference external" href="https://github.com/OCA/stock-logistics-warehouse/issues">GitHub Issues</a>.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us to smash it by providing a detailed and welcomed
@@ -407,15 +403,15 @@ If you spotted it first, help us to smash it by providing a detailed and welcome
 <p>Do not contact contributors directly about support or help with technical issues.</p>
 </div>
 <div class="section" id="credits">
-<h1><a class="toc-backref" href="#toc-entry-5">Credits</a></h1>
+<h1><a class="toc-backref" href="#toc-entry-4">Credits</a></h1>
 <div class="section" id="authors">
-<h2><a class="toc-backref" href="#toc-entry-6">Authors</a></h2>
+<h2><a class="toc-backref" href="#toc-entry-5">Authors</a></h2>
 <ul class="simple">
 <li>Quartile</li>
 </ul>
 </div>
 <div class="section" id="contributors">
-<h2><a class="toc-backref" href="#toc-entry-7">Contributors</a></h2>
+<h2><a class="toc-backref" href="#toc-entry-6">Contributors</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="https://www.quartile.co">Quartile</a>:<ul>
 <li>Aung Ko Ko Lin</li>
@@ -424,7 +420,7 @@ If you spotted it first, help us to smash it by providing a detailed and welcome
 </ul>
 </div>
 <div class="section" id="maintainers">
-<h2><a class="toc-backref" href="#toc-entry-8">Maintainers</a></h2>
+<h2><a class="toc-backref" href="#toc-entry-7">Maintainers</a></h2>
 <p>This module is maintained by the OCA.</p>
 <a class="reference external image-reference" href="https://odoo-community.org"><img alt="Odoo Community Association" src="https://odoo-community.org/logo.png" /></a>
 <p>OCA, or the Odoo Community Association, is a nonprofit organization whose

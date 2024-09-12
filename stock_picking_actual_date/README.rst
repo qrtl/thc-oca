@@ -28,28 +28,24 @@ Stock Picking Actual Date
 
 |badge1| |badge2| |badge3| |badge4| |badge5|
 
-This module adds an actual date to stock picking, stock move, and stock move line. If a picking does not specify an actual date, the stock move's actual date will be computed based on the 'Effective Date'.
+This module adds an Actual Date field to the stock picking, stock move, and stock move line models. This field allows users to record the actual date on which a stock transfer took place, in case the transaction in Odoo is processed after the fact.
 
 **Table of contents**
 
 .. contents::
    :local:
 
-Configuration
-=============
-
-The partner_tz module (https://github.com/OCA/partner-contact/tree/16.0/partner_tz) should be installed if the company operates internationally and has internal users in different timezones. This ensures that the actual date of stock moves is adjusted according to the company’s partner timezone by assigning the timezone to the company's partner, allowing users to understand that this date reflects the company’s timezone.
-
 Usage
 =====
 
-Fill in the actual date in the picking form. The actual date from the picking is propagated to its corresponding stock moves and stock move lines, and it is also passed to the SVL's journal entry accounting date.
-The inventory manager is only allowed to update the actual date for completed pickings.
+Use this module's function in the following situations:
+* If you are late in processing a transfer in Odoo and wish to record the transaction with the actual transfer date, fill in the Actual Date field in the picking form. The Actual Date of the picking is then propagated to its corresponding stock moves and stock move lines, and is also passed to the journal entry as the date.
+* You can also update the Actual Date of a completed picking if you belong to the Inventory Manager group. This operation updates the date of the related journal entries, re-proposing a new sequence to them as necessary.
 
 Known issues / Roadmap
 ======================
 
-Changing the actual date of a completed picking will propagate to the date of the related journal entry for the stock moves, and the sequence will change if the new date and the current sequence are mismatched. However, if the currency of the journal entry differs from the company currency, the debit and credit amounts will not be recalculated based on the exchange rate of the new date.
+Updating the Actual Date of a completed receipt picking for a foreign currency purchase does not trigger a recalculation of the amounts in the associated journal entries, even if the currency rate for the new date differs.
 
 Bug Tracker
 ===========
