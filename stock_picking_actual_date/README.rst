@@ -28,16 +28,28 @@ Stock Picking Actual Date
 
 |badge1| |badge2| |badge3| |badge4| |badge5|
 
-This module adds an accounting date in both stock pickings and stock moves.
-The accounting date from the picking is propagated to its corresponding stock move.
-If a picking doesn't specify an accounting date, the stock move's accounting date
-will be set to the 'Effective Date'. This value is then passed to the SVL's journal entry
-accounting date.
+This module adds an actual date to stock picking, stock move, and stock move line. If a picking does not specify an actual date, the stock move's actual date will be computed based on the 'Effective Date' and adjusted according to the current user's timezone.
 
 **Table of contents**
 
 .. contents::
    :local:
+
+Configuration
+=============
+
+The partner_tz module (https://github.com/OCA/partner-contact/tree/16.0/partner_tz) should be installed if the company operates internationally and has internal users in different timezones. This ensures that the actual date of stock moves is adjusted according to the company’s partner timezone by assigning the timezone to the company's partner, allowing users to understand that this date reflects the company’s timezone.
+
+Usage
+=====
+
+Fill in the actual date in the picking form. The actual date from the picking is propagated to its corresponding stock moves and stock move lines, and it is also passed to the SVL's journal entry accounting date.
+The inventory manager is only allowed to update the actual date for completed pickings.
+
+Known issues / Roadmap
+======================
+
+Changing the actual date of a completed picking will propagate to the date of the related journal entry for the stock moves, and the sequence will change if the new date and the current sequence are mismatched. However, if the currency of the journal entry differs from the company currency, the debit and credit amounts will not be recalculated based on the exchange rate of the new date.
 
 Bug Tracker
 ===========
@@ -55,7 +67,7 @@ Credits
 Authors
 ~~~~~~~
 
-* Quartile Limited
+* Quartile
 
 Contributors
 ~~~~~~~~~~~~
