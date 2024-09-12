@@ -1,3 +1,1 @@
-Changing the actual date of the done picking will propagate to the date of the related journal entry for the moves, 
-and the sequence will change. However, the calculation of debit and credit will not adjust based on the currency rate of the new date and 
-will remain at the initial values, even if the currency of the journal entry differs from the company currency.
+Changing the actual date of a completed picking will propagate to the date of the related journal entry for the stock moves, and the sequence will change if the new date and the current sequence are mismatched. However, if the currency of the journal entry differs from the company currency, the debit and credit amounts will not be recalculated based on the exchange rate of the new date.
