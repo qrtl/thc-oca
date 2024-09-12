@@ -51,5 +51,5 @@ class StockPicking(models.Model):
                     else:
                         move.name = False
                         move.date = rec.actual_date
-                    move.action_post()
+                account_moves.action_post()
         return res
