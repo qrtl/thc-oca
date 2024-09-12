@@ -28,7 +28,7 @@ Stock Picking Actual Date
 
 |badge1| |badge2| |badge3| |badge4| |badge5|
 
-This module adds an actual date to stock picking, stock move, and stock move line. If a picking does not specify an actual date, the stock move's actual date will be computed based on the 'Effective Date' and adjusted according to the current user's timezone.
+This module adds an actual date to stock picking, stock move, and stock move line. If a picking does not specify an actual date, the stock move's actual date will be computed based on the 'Effective Date'.
 
 **Table of contents**
 
