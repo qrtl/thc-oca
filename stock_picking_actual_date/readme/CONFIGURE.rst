@@ -1,1 +1,0 @@
-Set up the timezone field in the company record. This timezone will be used to convert and assign the actual_date for stock moves when no actual_date is specified in the picking, ensuring operations are recorded in the company’s local time.

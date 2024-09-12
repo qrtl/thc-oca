@@ -1,7 +1,6 @@
 # Copyright 2023-2024 Quartile Limited
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-import pytz
 
 from odoo import api, fields, models
 
@@ -20,10 +19,10 @@ class StockMove(models.Model):
             if rec.picking_id.actual_date:
                 rec.actual_date = rec.picking_id.actual_date
                 continue
-            company_tz = self.env.company.tz or "UTC"
-            tz = pytz.timezone(company_tz)
-            # Convert the UTC date directly to the company's timezone
-            rec.actual_date = rec.date.replace(tzinfo=pytz.utc).astimezone(tz)
+            tz = self.env.company.partner_id.tz or self.env.user.tz
+            rec.actual_date = fields.Date.context_today(
+                self.with_context(tz=tz), rec.date
+            )
 
     def _prepare_account_move_vals(
         self,
