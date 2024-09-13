@@ -7,25 +7,15 @@ def pre_init_hook(cr):
         """
         ALTER TABLE stock_move
         ADD COLUMN actual_date DATE;
+        UPDATE stock_move
+        SET actual_date = DATE(date);
         """
     )
     cr.execute(
         """
         ALTER TABLE stock_move_line
         ADD COLUMN actual_date DATE;
-        """
-    )
-    cr.execute(
-        """
-        UPDATE stock_move
-        SET actual_date = DATE(date)
-        WHERE date IS NOT NULL;
-        """
-    )
-    cr.execute(
-        """
         UPDATE stock_move_line
-        SET actual_date = DATE(date)
-        WHERE date IS NOT NULL;
+        SET actual_date = DATE(date);
         """
     )
