@@ -13,5 +13,6 @@
         "views/stock_move_views.xml",
         "views/stock_picking_views.xml",
     ],
+    "pre_init_hook": "pre_init_hook",
     "installable": True,
 }

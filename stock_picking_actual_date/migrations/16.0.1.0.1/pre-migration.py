@@ -21,3 +21,11 @@ def migrate(env, version):
             SET actual_date = accounting_date
             """
         )
+        env.cr.execute(
+            """
+            UPDATE stock_move_line sml
+            SET actual_date = sm.actual_date
+            FROM stock_move sm
+            WHERE sml.move_id = sm.id
+            """
+        )
