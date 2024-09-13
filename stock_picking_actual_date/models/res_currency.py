@@ -8,6 +8,5 @@ class ResCurrency(models.Model):
     _inherit = "res.currency"
 
     def _convert(self, from_amount, to_currency, company, date, round=True):
-        if self.env.context.get("actual_date"):
-            date = self.env.context.get("actual_date")
+        date = self.env.context.get("actual_date") or date
         return super()._convert(from_amount, to_currency, company, date, round)
