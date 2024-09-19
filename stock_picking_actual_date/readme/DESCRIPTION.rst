@@ -1,0 +1,1 @@
+This module adds an Actual Date field to the stock picking, stock move, and stock move line models. This field allows users to record the actual date on which a stock transfer took place, in case the transaction in Odoo is processed after the fact.
