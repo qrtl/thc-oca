@@ -8,8 +8,9 @@ class StockPicking(models.Model):
     _inherit = "stock.picking"
 
     actual_date = fields.Date(
+        tracking=True,
         help="Actual date of stock picking. If set, the value is propagated "
-        "to the related journal entries as the date."
+        "to the related journal entries as the date.",
     )
     is_editable_actual_date = fields.Boolean(
         compute="_compute_is_editable_actual_date", string="Is Editable"
