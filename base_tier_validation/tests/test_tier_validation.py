@@ -1,11 +1,14 @@
 # Copyright 2018-19 ForgeFlow S.L. (https://www.forgeflow.com)
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html).
 
+from unittest import mock
+
 from lxml import etree
 
 from odoo.exceptions import ValidationError
 from odoo.tests.common import Form, tagged
 
+from ..models.tier_validation import BASE_EXCEPTION_FIELDS as BEF, TierValidation as TV
 from .common import CommonTierValidation
 
 
@@ -851,27 +854,61 @@ class TierTierValidation(CommonTierValidation):
         )
         self.assertEqual(notifications_no_2, notifications_no_1)
 
+    def test_25_change_field_exception_validation(self):
+        """Test under and after validations"""
+        # Cannot create `tier.validation.exception` records because
+        # `tier.validation.tester` are fake model and its fields are
+        # not propagated to the DDBB and cannot read from `ir.model.fields`.
+        # We will use the mock.patch instead.
+        _tvf = ["test_validation_field"]
+        _rv = _tvf + BEF
+        self.assertEqual(self.test_record.test_validation_field, 0)
+        self.assertFalse(self.test_record.review_ids)
+        reviews = self.test_record.with_user(self.test_user_2.id).request_validation()
+        self.assertTrue(reviews)
+        self.test_record.invalidate_model()
+        self.assertTrue(self.test_record.review_ids)
+        # Unable to write test_validation_field under validation
+        with self.assertRaises(ValidationError):
+            self.test_record.with_user(self.test_user_2.id).write(
+                {"test_validation_field": 1}
+            )
+        # Able to write test_validation_field under validation
+        with mock.patch.object(
+            TV, "_get_under_validation_exceptions", return_value=_rv
+        ):
+            self.test_record.with_user(self.test_user_2.id).write(
+                {"test_validation_field": 2}
+            )
+        self.assertEqual(self.test_record.test_validation_field, 2)
+        # Validate record
+        record = self.test_record.with_user(self.test_user_1.id)
+        record.invalidate_model()
+        record.validate_tier()
+        record.action_confirm()
+        self.assertTrue(record.validated)
+        # Unable to write test_validation_field after validation
+        with self.assertRaises(ValidationError):
+            # Simulate there are fields, but not test_validation_field
+            with mock.patch.object(TV, "_get_validation_exceptions", return_value=BEF):
+                self.test_record.with_user(self.test_user_2.id).write(
+                    {"test_validation_field": 3}
+                )
+        # Able to write test_validation_field after validation
+        with mock.patch.multiple(
+            TV,
+            _get_validation_exceptions=mock.MagicMock(return_value=_tvf),
+            _get_after_validation_exceptions=mock.MagicMock(return_value=_rv),
+        ):
+            self.test_record.with_user(self.test_user_2.id).write(
+                {"test_validation_field": 4}
+            )
+        self.assertEqual(self.test_record.test_validation_field, 4)
+
 
 @tagged("at_install")
 class TierTierValidationView(CommonTierValidation):
     def test_view_manual(self):
-        # We need to add a view in order to ensure that an automatic view with all
-        # fields is not created
-        self.env["ir.ui.view"].create(
-            {
-                "model": self.test_record._name,
-                "name": "Demo view",
-                "arch": """<form>
-            <header>
-                <button name="action_confirm" type="object" string="Confirm" />
-                <field name="state" widget="statusbar" />
-            </header>
-            <sheet>
-                <field name="test_field" />
-            </sheet>
-            </form>""",
-            }
-        )
         with Form(self.test_record) as f:
             self.assertNotIn("review_ids", f._values)
             form = etree.fromstring(f._view["arch"])
@@ -880,26 +917,19 @@ class TierTierValidationView(CommonTierValidation):
             self.assertFalse(form.xpath("//button[@name='request_validation']"))
 
     def test_view_automatic(self):
-        # We need to add a view in order to ensure that an automatic view with all
-        # fields is not created
-        self.env["ir.ui.view"].create(
-            {
-                "model": self.test_record_2._name,
-                "name": "Demo view",
-                "arch": """<form>
-            <header>
-                <button name="action_confirm" type="object" string="Confirm" />
-                <field name="state" widget="statusbar" />
-            </header>
-            <sheet>
-                <field name="test_field" />
-            </sheet>
-            </form>""",
-            }
-        )
         with Form(self.test_record_2) as f:
             self.assertIn("review_ids", f._values)
             form = etree.fromstring(f._view["arch"])
             self.assertTrue(form.xpath("//field[@name='review_ids']"))
             self.assertTrue(form.xpath("//field[@name='can_review']"))
             self.assertTrue(form.xpath("//button[@name='request_validation']"))
+
+    def test_get_view(self):
+        view = self.test_record_2.get_view()
+        model = "tier.validation.tester2"
+        self.assertEqual(view["model"], model)
+        self.assertEqual(view["models"].keys(), {model, "tier.review"})
+        self.assertIn("id", view["models"][model])
+        self.assertIn("need_validation", view["models"][model])
+        self.assertIn("next_review", view["models"][model])
+        self.assertIn("review_ids", view["models"][model])
