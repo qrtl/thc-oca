@@ -1,6 +1,11 @@
-Enable the "Update Restrict Model" of specific model to restrict update from unpermitted users.
-To set a user as a permitted user to update restricted model(s), click on "Unrestrict
-Update" toggle button in the user form.
+When you want to limit the update permissions of a model to certain groups:
 
-Optionally, to set a user as read-only user to all models, click on "Read-only" toggle
-button in the user form.
+#. Go to *Settings > Techinical > Database Structure > Models*
+#. Open the form view of the model, and select 'Update Restrict Model'
+#. Assign the groups that should be exempt from the restriction to 'Update-allowed Groups'
+
+
+When you want revoke update permissions for a specific user:
+
+#. Go to *Settings > Users & Companies > Users*
+#. Open the form view of the user, and click the 'Read-only' smart button

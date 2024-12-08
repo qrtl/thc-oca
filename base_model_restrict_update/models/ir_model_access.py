@@ -1,5 +1,5 @@
-# Copyright 2021 Quartile Limited
-# License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
+# Copyright 2021-2024 Quartile
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl).
 
 from odoo import api, models
 from odoo.exceptions import AccessError
@@ -36,13 +36,20 @@ class IrModelAccess(models.Model):
 
     @api.model
     def _test_restrict_update(self, model):
+        # Get the IDs of unresticted users for the model if it's restricted
         self.env.cr.execute(
-            "SELECT restrict_update FROM ir_model WHERE model = %s", (model,)
+            """
+            SELECT gurel.uid
+            FROM ir_model m
+            LEFT JOIN ir_model_res_groups_update_allowed_rel mgrel ON m.id = mgrel.ir_model_id
+            LEFT JOIN res_groups_users_rel gurel ON mgrel.res_groups_id = gurel.gid
+            WHERE m.model = %s
+              AND m.restrict_update = true
+            """,
+            (model,),
         )
-        query_res = self.env.cr.dictfetchone()
-        if query_res["restrict_update"] and not self.env.user.unrestrict_model_update:
-            return True
-        return False
+        query_res = self.env.cr.fetchall()
+        return bool(query_res) and (self.env.uid,) not in query_res
 
     @api.model
     def check(self, model, mode="read", raise_exception=True):

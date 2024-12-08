@@ -7,6 +7,11 @@
         <field name="arch" type="xml">
             <field name="transient" position="after">
                 <field name="restrict_update" />
+                <field
+                    name="update_allowed_group_ids"
+                    attrs="{'invisible':[('restrict_update','=',False)]}"
+                    widget="many2many_tags"
+                />
             </field>
         </field>
     </record>
