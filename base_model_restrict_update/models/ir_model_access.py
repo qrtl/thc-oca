@@ -12,27 +12,35 @@ class IrModelAccess(models.Model):
     @api.model
     def _readonly_exclude_models(self):
         """Models updtate/create by system, and should be excluded from checking"""
-        return (
-            self.sudo()
-            .search(
-                [
-                    ("group_id", "=", False),
-                    "|",
-                    ("perm_write", "=", True),
-                    "|",
-                    ("perm_create", "=", True),
-                    ("perm_unlink", "=", True),
-                ]
-            )
-            .mapped("model_id.model")
+        self.env.cr.execute(
+            """
+            SELECT m.model
+            FROM ir_model_access ma
+            JOIN ir_model m ON ma.model_id = m.id
+            WHERE ma.group_id IS NULL
+              AND (
+                ma.perm_write = TRUE
+                OR ma.perm_create = TRUE
+                OR ma.perm_unlink = TRUE
+              )
+            """,
         )
+        return self.env.cr.fetchall()
 
     @api.model
     def _test_readonly(self, model):
-        exclude_models = self._readonly_exclude_models()
-        if model not in exclude_models and self.env.user.is_readonly_user:
-            return True
-        return False
+        if not self.env.user.is_readonly_user:
+            return False
+        if (model,) in self._readonly_exclude_models():
+            return False
+        models_to_exclude = (
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("base_model_restrict_update.excluded_models_from_readonly", "")
+        )
+        if model in models_to_exclude:
+            return False
+        return True
 
     @api.model
     def _test_restrict_update(self, model):
