@@ -25,7 +25,7 @@ class TestBaseModelRestrictUpdate(common.TransactionCase):
 
     def test_no_restriction(self):
         self.partner_model_with_test_user.create({"name": "bar"})
-        self.test_partner_with_test_user.write({"name": "bar"})
+        self.test_partner_with_test_user.write({"name": "baz"})
         self.test_partner_with_test_user.unlink()
 
     def test_with_model_restriction(self):
@@ -33,19 +33,19 @@ class TestBaseModelRestrictUpdate(common.TransactionCase):
         with self.assertRaises(AccessError):
             self.partner_model_with_test_user.create({"name": "bar"})
         with self.assertRaises(AccessError):
-            self.test_partner_with_test_user.write({"name": "bar"})
+            self.test_partner_with_test_user.write({"name": "baz"})
         with self.assertRaises(AccessError):
             self.test_partner_with_test_user.unlink()
         self.model_partner.update_allowed_group_ids = self.group_partner_update
         with self.assertRaises(AccessError):
             self.partner_model_with_test_user.create({"name": "bar"})
         with self.assertRaises(AccessError):
-            self.test_partner_with_test_user.write({"name": "bar"})
+            self.test_partner_with_test_user.write({"name": "baz"})
         with self.assertRaises(AccessError):
             self.test_partner_with_test_user.unlink()
         self.test_user.groups_id = [Command.link(self.group_partner_update.id)]
         self.partner_model_with_test_user.create({"name": "bar"})
-        self.test_partner_with_test_user.write({"name": "bar"})
+        self.test_partner_with_test_user.write({"name": "baz"})
         self.test_partner_with_test_user.unlink()
 
     def test_with_user_readonly(self):
@@ -53,7 +53,7 @@ class TestBaseModelRestrictUpdate(common.TransactionCase):
         with self.assertRaises(AccessError):
             self.partner_model_with_test_user.create({"name": "bar"})
         with self.assertRaises(AccessError):
-            self.test_partner_with_test_user.write({"name": "bar"})
+            self.test_partner_with_test_user.write({"name": "baz"})
         with self.assertRaises(AccessError):
             self.test_partner_with_test_user.unlink()
         # To confirm that is_readonly_user prevails
@@ -63,12 +63,21 @@ class TestBaseModelRestrictUpdate(common.TransactionCase):
         with self.assertRaises(AccessError):
             self.partner_model_with_test_user.create({"name": "bar"})
         with self.assertRaises(AccessError):
-            self.test_partner_with_test_user.write({"name": "bar"})
+            self.test_partner_with_test_user.write({"name": "baz"})
         with self.assertRaises(AccessError):
             self.test_partner_with_test_user.unlink()
         self.test_user.is_readonly_user = False
         self.partner_model_with_test_user.create({"name": "bar"})
-        self.test_partner_with_test_user.write({"name": "bar"})
+        self.test_partner_with_test_user.write({"name": "baz"})
+        self.test_user.is_readonly_user = True
+        with self.assertRaises(AccessError):
+            self.test_partner_with_test_user.write({"name": "qux"})
+        with self.assertRaises(AccessError):
+            self.test_partner_with_test_user.unlink()
+        self.env["ir.config_parameter"].sudo().set_param(
+            "base_model_restrict_update.excluded_models_from_readonly", "res.partner"
+        )
+        self.test_partner_with_test_user.write({"name": "qux"})
         self.test_partner_with_test_user.unlink()
 
     def test_set_user_readonly(self):

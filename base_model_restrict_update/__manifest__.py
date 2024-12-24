@@ -3,11 +3,16 @@
 {
     "name": "Update Restrict Model",
     "version": "16.0.1.0.0",
-    "depends": ["base"],
+    "depends": ["base_setup"],
     "website": "https://github.com/OCA/server-tools",
     "author": "Odoo Community Association (OCA), Quartile Limited",
     "category": "Others",
     "license": "LGPL-3",
-    "data": ["views/ir_model_views.xml", "views/res_users_views.xml"],
+    "data": [
+        "data/config_parameter_data.xml",
+        "views/ir_model_views.xml",
+        "views/res_config_settings.xml",
+        "views/res_users_views.xml",
+    ],
     "installable": True,
 }
