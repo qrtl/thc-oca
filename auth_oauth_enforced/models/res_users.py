@@ -9,6 +9,10 @@ class ResUsers(models.Model):
 
     @api.model
     def _is_allowed_password_login(self):
+        # Skip enforcing the password login in Odoo.sh staging instances
+        # as their URIs are not predictable.
+        if self.env["ir.config_parameter"].sudo().get_param("database.is_neutralized"):
+            return True
         force_domains = self.company_id.force_oauth_domains
         if not force_domains:
             return True
