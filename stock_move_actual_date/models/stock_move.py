@@ -18,10 +18,9 @@ class StockMove(models.Model):
     @api.depends("date", "picking_id.actual_date", "scrap_ids.actual_date")
     def _compute_actual_date(self):
         tz = self._get_timezone()
+        context_actual_date = self.env.context.get("actual_date")
         for rec in self:
-            actual_date = (
-                self.env.context.get("actual_date") or rec.scrap_ids.actual_date
-            )
+            actual_date = context_actual_date or rec.scrap_ids.actual_date
             if actual_date:
                 rec.actual_date = actual_date
                 continue
@@ -31,6 +30,13 @@ class StockMove(models.Model):
             rec.actual_date = fields.Date.context_today(
                 self.with_context(tz=tz), rec.date
             )
+
+    def _action_done(self, cancel_backorder=False):
+        moves = super()._action_done(cancel_backorder)
+        # i.e. Inventory adjustments with actual date
+        if self.env.context.get("force_period_date"):
+            self.write({"actual_date": self.env.context["force_period_date"]})
+        return moves
 
     def _prepare_account_move_vals(
         self,
@@ -42,7 +48,7 @@ class StockMove(models.Model):
         svl_id,
         cost,
     ):
-        am_vals = super(StockMove, self)._prepare_account_move_vals(
+        am_vals = super()._prepare_account_move_vals(
             credit_account_id,
             debit_account_id,
             journal_id,
@@ -51,12 +57,9 @@ class StockMove(models.Model):
             svl_id,
             cost,
         )
-        # i.e. Inventory adjustments with actual date
-        if self._context.get("force_period_date"):
-            self.write({"actual_date": self._context["force_period_date"]})
-            return am_vals
-        if self.actual_date:
-            am_vals.update({"date": self.actual_date})
+        actual_date = self.env.context.get("force_period_date") or self.actual_date
+        if actual_date:
+            am_vals.update({"date": actual_date})
         return am_vals
 
     def _get_price_unit(self):
