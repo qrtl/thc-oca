@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_field_float_decimal_all,access.field.float.decimal.all,model_field_float_decimal,,1,0,0,0
+access_field_float_decimal_admin,access.field.float.decimal.admin,model_field_float_decimal,base.group_system,1,1,1,1

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <record id="field_float_decimal_company_rule" model="ir.rule">
+        <field name="name">Field Float Decimal Multi-company</field>
+        <field name="model_id" ref="model_field_float_decimal" />
+        <field
+            name="domain_force"
+        >['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+    </record>
+</odoo>
