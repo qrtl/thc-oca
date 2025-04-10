@@ -33,7 +33,7 @@ class TestTemplateStringSwapper(TransactionCase):
         result = self.view_obj._render_template(template, values)
         self.assertFalse("Page:" in str(result))
         self.assertTrue("Page No.:" in str(result))
-        # Switch tha language to Japanese
+        # Switch the language to Japanese
         view_obj = self.view_obj.with_context(lang="ja_JP")
         view = view_obj.browse(view.id)
         values = {"company": self.env.company, "report_type": "pdf", "o": view}

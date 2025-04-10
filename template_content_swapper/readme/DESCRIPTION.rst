@@ -1,4 +1,6 @@
-This module provides a generic functionality to replace QWeb view elements.
+This module offers a generic functionality for replacing QWeb view elements.
+Typically, element replacements are conducted through a template using an XPATH replacement by creating a new module.
+With this module, users don't need to do this; they simply need to create template.content.mapping records for the templates they wish to modify.
 
 Examples:
 
