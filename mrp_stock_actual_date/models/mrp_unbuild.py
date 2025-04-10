@@ -8,16 +8,11 @@ class MrpUnbuild(models.Model):
     _name = "mrp.unbuild"
     _inherit = ["mrp.unbuild", "actual.date.mixin"]
 
-    def write(self, vals):
-        res = super().write(vals)
-        if "actual_date" in vals:
-            for rec in self:
-                if rec.state != "done":
-                    continue
-                account_moves = (rec.consume_line_ids + rec.produce_line_ids).mapped(
-                    "account_move_ids"
-                )
-                if not account_moves:
-                    continue
-                account_moves._update_accounting_date()
-        return res
+    def _get_stock_moves(self):
+        self.ensure_one()
+        return self.consume_line_ids + self.produce_line_ids
+
+    def action_unbuild(self):
+        self.ensure_one()
+        self = self.with_context(actual_date_source=self.actual_date)
+        return super().action_unbuild()

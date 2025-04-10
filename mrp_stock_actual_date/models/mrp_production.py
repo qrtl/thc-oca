@@ -8,16 +8,9 @@ class MrpProduction(models.Model):
     _name = "mrp.production"
     _inherit = ["mrp.production", "actual.date.mixin"]
 
-    def write(self, vals):
-        res = super().write(vals)
-        if "actual_date" in vals:
-            for rec in self:
-                if rec.state != "done":
-                    continue
-                account_moves = (
-                    rec.move_raw_ids + rec.move_finished_ids
-                ).account_move_ids
-                if not account_moves:
-                    continue
-                account_moves._update_accounting_date()
-        return res
+    def _get_stock_move_field_name(self):
+        return "move_raw_ids"
+
+    def _get_stock_moves(self):
+        self.ensure_one()
+        return self.move_raw_ids + self.move_finished_ids
