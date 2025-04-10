@@ -6,6 +6,7 @@ from datetime import date
 
 from freezegun import freeze_time
 
+from odoo import Command
 from odoo.tests import Form, common
 
 
@@ -40,14 +41,12 @@ class TestMrpStockActualDate(common.TransactionCase):
                 "product_tmpl_id": cls.product_finished.product_tmpl_id.id,
                 "product_qty": 1.0,
                 "bom_line_ids": [
-                    (
-                        0,
-                        0,
+                    Command.create(
                         {
                             "product_id": cls.product_component.id,
                             "product_qty": 1.0,
-                        },
-                    )
+                        }
+                    ),
                 ],
             }
         )

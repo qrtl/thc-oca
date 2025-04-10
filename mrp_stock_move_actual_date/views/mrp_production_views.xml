@@ -11,7 +11,6 @@
                     date="actual_date"
                     default_period="this_month"
                 />
-                <separator />
             </filter>
             <filter name="scheduled_date" position="after">
                 <filter
