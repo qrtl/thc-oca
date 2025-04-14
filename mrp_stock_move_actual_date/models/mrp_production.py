@@ -8,8 +8,11 @@ class MrpProduction(models.Model):
     _name = "mrp.production"
     _inherit = ["mrp.production", "actual.date.mixin"]
 
-    def _get_stock_move_field_name(self):
-        return "move_raw_ids"
+    def _get_actual_date_update_triggers(self):
+        return super()._get_actual_date_update_triggers() + [
+            "date_done",
+            "move_raw_ids",
+        ]
 
     def _get_stock_moves(self):
         self.ensure_one()
