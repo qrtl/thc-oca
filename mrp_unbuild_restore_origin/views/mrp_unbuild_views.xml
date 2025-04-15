@@ -11,6 +11,11 @@
                     attrs="{'invisible': [('mo_id', '=', False)]}"
                 />
             </xpath>
+            <xpath expr="//field[@name='location_dest_id']" position="attributes">
+                <attribute
+                    name="attrs"
+                >{'invisible': [('restore_rm_stock_in_origin_loc', '=', True)]}</attribute>
+            </xpath>
         </field>
     </record>
     <record id="mrp_unbuild_form_view_simplified" model="ir.ui.view">
@@ -23,6 +28,11 @@
                     name="restore_rm_stock_in_origin_loc"
                     attrs="{'invisible': [('mo_id', '=', False)]}"
                 />
+            </xpath>
+            <xpath expr="//field[@name='location_dest_id']" position="attributes">
+                <attribute
+                    name="attrs"
+                >{'invisible': [('restore_rm_stock_in_origin_loc', '=', True)]}</attribute>
             </xpath>
         </field>
     </record>
