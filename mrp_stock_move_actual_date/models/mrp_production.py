@@ -10,8 +10,8 @@ class MrpProduction(models.Model):
 
     def _get_actual_date_update_triggers(self):
         return super()._get_actual_date_update_triggers() + [
-            "date_done",
             "move_raw_ids",
+            "move_finished_ids",
         ]
 
     def _get_stock_moves(self):
