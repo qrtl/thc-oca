@@ -16,7 +16,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: stock_move_actual_date
-#: model:ir.model.fields,field_description:stock_move_actual_date.field_actual_date_mixin__actual_date
+#: model:ir.model.fields,field_description:stock_move_actual_date.field_stock_actual_date_mixin__actual_date
 #: model:ir.model.fields,field_description:stock_move_actual_date.field_stock_move__actual_date
 #: model:ir.model.fields,field_description:stock_move_actual_date.field_stock_move_line__actual_date
 #: model:ir.model.fields,field_description:stock_move_actual_date.field_stock_picking__actual_date
@@ -34,7 +34,7 @@ msgid "Currency"
 msgstr "通貨"
 
 #. module: stock_move_actual_date
-#: model:ir.model.fields,help:stock_move_actual_date.field_actual_date_mixin__actual_date
+#: model:ir.model.fields,help:stock_move_actual_date.field_stock_actual_date_mixin__actual_date
 #: model:ir.model.fields,help:stock_move_actual_date.field_stock_picking__actual_date
 #: model:ir.model.fields,help:stock_move_actual_date.field_stock_scrap__actual_date
 msgid ""
@@ -42,7 +42,7 @@ msgid ""
 msgstr ""
 
 #. module: stock_move_actual_date
-#: model:ir.model.fields,field_description:stock_move_actual_date.field_actual_date_mixin__is_editable_actual_date
+#: model:ir.model.fields,field_description:stock_move_actual_date.field_stock_actual_date_mixin__is_editable_actual_date
 #: model:ir.model.fields,field_description:stock_move_actual_date.field_stock_picking__is_editable_actual_date
 #: model:ir.model.fields,field_description:stock_move_actual_date.field_stock_scrap__is_editable_actual_date
 msgid "Is Editable"
@@ -74,6 +74,6 @@ msgid "Transfer"
 msgstr "在庫転送"
 
 #. module: stock_move_actual_date
-#: model:ir.model,name:stock_move_actual_date.model_actual_date_mixin
-msgid "actual.date.mixin"
+#: model:ir.model,name:stock_move_actual_date.model_stock_actual_date_mixin
+msgid "stock.actual.date.mixin"
 msgstr ""
