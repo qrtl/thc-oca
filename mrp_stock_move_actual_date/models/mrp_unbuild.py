@@ -6,7 +6,7 @@ from odoo import models
 
 class MrpUnbuild(models.Model):
     _name = "mrp.unbuild"
-    _inherit = ["mrp.unbuild", "actual.date.mixin"]
+    _inherit = ["mrp.unbuild", "stock.actual.date.mixin"]
 
     def _get_stock_moves(self):
         self.ensure_one()

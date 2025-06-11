@@ -6,7 +6,7 @@ from odoo import models
 
 class MrpProduction(models.Model):
     _name = "mrp.production"
-    _inherit = ["mrp.production", "actual.date.mixin"]
+    _inherit = ["mrp.production", "stock.actual.date.mixin"]
 
     def _get_actual_date_update_triggers(self):
         return super()._get_actual_date_update_triggers() + [
