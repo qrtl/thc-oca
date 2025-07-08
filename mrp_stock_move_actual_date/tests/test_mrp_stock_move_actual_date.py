@@ -1,5 +1,5 @@
 # Copyright 2025 Quartile (https://www.quartile.co)
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 
 from datetime import date
@@ -15,10 +15,7 @@ class TestMrpStockActualDate(common.TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.category = cls.env["product.category"].create(
-            {
-                "name": "Test Category",
-                "property_valuation": "real_time",
-            }
+            {"name": "Test Category", "property_valuation": "real_time"}
         )
         cls.product_finished = cls.env["product.product"].create(
             {
@@ -42,10 +39,7 @@ class TestMrpStockActualDate(common.TransactionCase):
                 "product_qty": 1.0,
                 "bom_line_ids": [
                     Command.create(
-                        {
-                            "product_id": cls.product_component.id,
-                            "product_qty": 1.0,
-                        }
+                        {"product_id": cls.product_component.id, "product_qty": 1.0}
                     ),
                 ],
             }
