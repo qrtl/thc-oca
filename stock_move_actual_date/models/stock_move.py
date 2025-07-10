@@ -23,12 +23,11 @@ class StockMove(models.Model):
         # This handles the case where a move is created separately after the parent record.
         # For example, in mrp_stock_actual_date, the actual_date is passed via context
         # when validating an unbuild order or a scrap.
-        res = super().create(vals_list)
+        moves = super().create(vals_list)
         actual_date_source = self.env.context.get("actual_date_source")
         if actual_date_source:
-            for rec in res:
-                rec.actual_date_source = actual_date_source
-        return res
+            moves.actual_date_source = actual_date_source
+        return moves
 
     @api.depends("date", "actual_date_source")
     def _compute_actual_date(self):
@@ -40,6 +39,39 @@ class StockMove(models.Model):
             rec.actual_date = fields.Date.context_today(
                 self.with_context(tz=tz), rec.date
             )
+
+    @api.model
+    def _read_group(
+        self,
+        domain,
+        fields_list,
+        groupby,
+        offset=0,
+        limit=None,
+        orderby=False,
+        lazy=True,
+    ):
+        if self.env.context.get("use_actual_date"):
+            tz = self._get_timezone()
+            domain = [
+                (
+                    "actual_date",
+                    condition[1],
+                    fields.Date.context_today(self.with_context(tz=tz), condition[2]),
+                )
+                if isinstance(condition, (list, tuple)) and condition[0] == "date"
+                else condition
+                for condition in domain
+            ]
+        return super()._read_group(
+            domain,
+            fields_list,
+            groupby,
+            offset=offset,
+            limit=limit,
+            orderby=orderby,
+            lazy=lazy,
+        )
 
     def _action_done(self, cancel_backorder=False):
         moves = super()._action_done(cancel_backorder)

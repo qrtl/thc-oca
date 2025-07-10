@@ -1,12 +1,12 @@
 # Copyright 2025 Quartile (https://www.quartile.co)
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from odoo import models
 
 
 class MrpUnbuild(models.Model):
     _name = "mrp.unbuild"
-    _inherit = ["mrp.unbuild", "actual.date.mixin"]
+    _inherit = ["mrp.unbuild", "stock.actual.date.mixin"]
 
     def _get_stock_moves(self):
         self.ensure_one()
