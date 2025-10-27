@@ -77,7 +77,9 @@ class MrpUnbuild(models.Model):
                     for move_line in raw_move.move_line_ids:
                         vals = self._get_move_line_vals(move, move_line)
                         vals_list.append(vals)
-                    self.env["stock.move.line"].create(vals_list)
+                    self.env["stock.move.line"].with_context(
+                        default_lot_id=False
+                    ).create(vals_list)
                     move.write({"state": "confirmed"})
                 moves += move
         return moves.with_context(produce_moves=True)
