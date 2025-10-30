@@ -38,6 +38,14 @@ class MrpUnbuild(models.Model):
             "product_uom_id": move.product_uom.id,
             "location_id": move.location_id.id,
             "location_dest_id": move.location_dest_id.id,
+            # When executing button_unbuild, the lot assigned to the MO is set in the
+            # context as default_lot_id. As a result, when creating related material
+            # stock_move_line records, the default_lot_ids is automatically used as
+            # the default lot_id, even before _action_assign explicitly assigns a lot.
+            # This can cause an error when the default lot does not match the product.
+            # Therefore, we explicitly specify the lot here to prevent using the default
+            # lot value.
+            "lot_id": move_line.lot_id.id,
         }
         if self.env.context.get("exact_location"):
             vals["location_id"] = move_line.location_dest_id.id
@@ -77,9 +85,7 @@ class MrpUnbuild(models.Model):
                     for move_line in raw_move.move_line_ids:
                         vals = self._get_move_line_vals(move, move_line)
                         vals_list.append(vals)
-                    self.env["stock.move.line"].with_context(
-                        default_lot_id=False
-                    ).create(vals_list)
+                    self.env["stock.move.line"].create(vals_list)
                     move.write({"state": "confirmed"})
                 moves += move
         return moves.with_context(produce_moves=True)
