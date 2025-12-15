@@ -1,8 +1,6 @@
 # Copyright 2025 Quartile (https://www.quartile.co)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from collections import defaultdict
-
 from odoo import fields, models
 
 
@@ -52,7 +50,6 @@ class MrpUnbuild(models.Model):
                     unbuild.mo_id.product_qty, unbuild.product_uom_id
                 )
             )
-            qty_already_used = defaultdict(float)
             for raw_move in raw_moves:
                 move = unbuild._generate_move_from_existing_move(
                     raw_move,
@@ -62,18 +59,16 @@ class MrpUnbuild(models.Model):
                 )
                 if move.has_tracking == "none":
                     vals_list = []
-                    needed_quantity = move.product_uom_qty
+                    remaining_qty = move.product_uom_qty
                     for move_line in raw_move.move_line_ids:
-                        taken_quantity = min(
-                            needed_quantity,
-                            move_line.qty_done - qty_already_used[move_line],
-                        )
-                        if taken_quantity:
-                            vals = self._prepare_move_line_vals(
-                                move, move_line, taken_quantity
-                            )
-                            vals_list.append(vals)
-                            qty_already_used[move_line] += taken_quantity
+                        if remaining_qty <= 0:
+                            break
+                        taken_qty = min(remaining_qty, move_line.qty_done)
+                        if not taken_qty:
+                            continue
+                        vals = self._prepare_move_line_vals(move, move_line, taken_qty)
+                        vals_list.append(vals)
+                        remaining_qty -= taken_qty
                     self.env["stock.move.line"].create(vals_list)
                     move.write({"state": "confirmed"})
                 moves += move
