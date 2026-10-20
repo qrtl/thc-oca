@@ -176,6 +176,7 @@ class IrUiView(models.Model):
                 else:
                     new_value = str(expression.AND([old_domain, new_domain]))
                 new_value = self.str2var_domain_text(new_value)
+                old_value = "".join(old_value.splitlines())
             else:
                 # We must ensure that the domain definition has not line breaks because
                 # in update mode the domain cause an invalid syntax error
@@ -186,6 +187,42 @@ class IrUiView(models.Model):
                     new_value=new_value,
                     old_value=old_value or [],
                 )
+            node.attrib[attribute_name] = new_value
+        return source
+
+    @api.model
+    def inheritance_handler_attributes_attrs_domain_add(self, source, specs):
+        """Implement attrs_domain_add
+
+        <attribute name="$attribute" operation="attrs_domain_add"
+                   key="$attrs_key" join_operator="OR">
+            $domain_to_add_to_attrs_key
+        </attribute>
+        """
+        node = self.locate_node(source, specs)
+        for attribute_node in specs:
+            attribute_name = attribute_node.get("name")
+            key = attribute_node.get("key")
+            join_operator = attribute_node.get("join_operator") or "AND"
+            old_value = node.get(attribute_name) or ""
+            if old_value:
+                old_value = ast.literal_eval(
+                    self.var2str_domain_text(old_value.strip())
+                )
+                old_domain_attrs = old_value.get(key)
+                new_domain = ast.literal_eval(
+                    self.var2str_domain_text(attribute_node.text.strip())
+                )
+                if join_operator == "OR":
+                    new_value = expression.OR([old_domain_attrs, new_domain])
+                else:
+                    new_value = expression.AND([old_domain_attrs, new_domain])
+                old_value[key] = new_value
+                new_value = self.str2var_domain_text(str(old_value))
+            else:
+                # We must ensure that the domain definition has not line breaks because
+                # in update mode the domain cause an invalid syntax error
+                new_value = "{'%s': %s}" % (key, attribute_node.text.strip())
             node.attrib[attribute_name] = new_value
         return source
 
